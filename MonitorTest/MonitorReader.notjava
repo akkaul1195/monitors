@@ -1,0 +1,33 @@
+import java.util.Random;
+
+public monitor class MonitorReader {
+  int full;
+  int numWriters;
+  int numReaders;
+
+  public MonitorReader(){
+    full = 0;
+    numWriters = 0;
+    numReaders = 0;
+  }
+
+  public void unlock(int i){
+    if(i == 0){
+      numWriters = 0;
+    } else if (i == 1){
+      numReaders -= 1;
+    }
+    System.out.println("Number of Readers: " + numReaders + " Number of Writers: " + numWriters);
+  }
+
+  public void await(int i){
+    if(i == 0){
+      waituntil(numReaders == 0 && numWriters == 0);
+      numWriters = 1;
+    } else if (i == 1){
+      waituntil(numReaders <= 5 && numWriters == 0);
+      numReaders += 1;
+    }
+    System.out.println("Number of Readers: " + numReaders + " Number of Writers: " + numWriters);
+  }
+}

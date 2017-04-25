@@ -1,0 +1,17 @@
+public monitor class MonitorB{
+  int full;
+
+  public MonitorB(){
+    full = 0;
+  }
+
+  public void unlock(){
+    full -= 1;
+  }
+
+  public void await(){
+    waituntil(full <= 100);
+    full += 1;
+  }
+
+}

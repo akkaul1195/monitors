@@ -1,0 +1,27 @@
+import java.util.*;
+
+public monitor class MonitorQueue{
+  ArrayList<Integer> queue;
+  ArrayList<Integer> cumulative;
+
+  public MonitorQueue(){
+    queue = new ArrayList<Integer>();
+    cumulative = new ArrayList<Integer>();
+  }
+
+  public void unlock(){
+    queue.remove(0);
+    Thread t = Thread.currentThread();
+    Integer i = (int) (long) t.getId();
+    System.out.println("Removed Thread: " + i);
+  }
+
+  public void await(){
+    Thread t = Thread.currentThread();
+    Integer i = (int) (long) t.getId();
+    cumulative.add(i);
+    System.out.println("Added Thread: " + i);
+    queue.add(i);
+    waituntil(queue.get(0) == i);
+  }
+}
