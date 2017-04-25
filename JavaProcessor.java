@@ -5,6 +5,15 @@ public class JavaProcessor {
         File file = new File(args[0]);
         BufferedReader reader = null;
         PrintWriter writer = null;
+        boolean notifyAll = false;
+        if (args[1].equals("1")) {
+            notifyAll = true;
+        } else if (args[1].equals("2")) {
+            notifyAll = false;
+        } else {
+            System.out.println("Please use 1 for notify all or 2 for notify");
+            return;
+        }
 
         try {
             String fileName = args[0];
@@ -77,6 +86,13 @@ public class JavaProcessor {
                                 writer.println(tabBuf + "while (!" + cond + ") {");
                                 tabBuf += "\t";
                                 writer.println(tabBuf + "isEmpty.await();");
+                                if (!notifyAll) {
+                                    writer.println(tabBuf + "if (!" + cond + ") {");
+                                    tabBuf += "\t";
+                                    writer.println(tabBuf + "isEmpty.signal();");
+                                    tabBuf = tabBuf.substring(0, tabBuf.length()-1);
+                                    writer.println(tabBuf + "}");
+                                }
                                 tabBuf = tabBuf.substring(0, tabBuf.length()-1);
                                 writer.println(tabBuf + "}");
                             } else {
@@ -102,7 +118,11 @@ public class JavaProcessor {
                             if (bCount == 0) {
                                 tabBuf += "\t";
                                 if (ret == false) {
-                                    writer.println(tabBuf + "isEmpty.signalAll();");
+                                    if (notifyAll) {
+                                        writer.println(tabBuf + "isEmpty.signalAll();");
+                                    } else {
+                                        writer.println(tabBuf + "isEmpty.signal();");
+                                    }
                                 }
                                 tabBuf = tabBuf.substring(0, tabBuf.length()-1);
                                 writer.println(tabBuf + "} finally {");
@@ -113,7 +133,11 @@ public class JavaProcessor {
                                 writer.println(text);
                                 break;
                             } else if (text.contains("return ")) {
-                                writer.println(tabBuf + "isEmpty.signalAll();");
+                                if (notifyAll) {
+                                    writer.println(tabBuf + "isEmpty.signalAll();");
+                                } else {
+                                    writer.println(tabBuf + "isEmpty.signal();");
+                                }
                                 writer.println(tabBuf + text);
                                 ret = true;
                             } else {
