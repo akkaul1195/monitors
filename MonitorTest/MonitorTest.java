@@ -1,6 +1,6 @@
 
 public class MonitorTest implements Runnable {
-	final static int SIZE = 5;
+	final static int SIZE = 200;
 	static int inc;
 	static MonitorA mA = new MonitorA();
 	
@@ -14,20 +14,27 @@ public class MonitorTest implements Runnable {
 		for (int i = 0; i < SIZE; ++i) {
 			t[i].start();
 		}
-		
-		System.out.println("The Number " + inc);
-		
+		while(true){
+			System.out.println("The Number " + inc);
+		}
 	}
 	
 	public static void increment(){
-		mA.await();
-		inc++;
-		mA.unlock();
+		try{
+			mA.await();
+			inc++;
+			mA.unlock();
+		} catch (InterruptedException e){
+			e.printStackTrace();
+		}
 	}
 	
 	public void run(){
-		increment();
-		
+		int i = 0;
+		for (i=0; i<400000; i++){
+			increment();
+		}
+			
 	}
 	
 }
