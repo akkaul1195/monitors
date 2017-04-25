@@ -7,11 +7,16 @@ public class JavaProcessor {
         PrintWriter writer = null;
 
         try {
-            writer = new PrintWriter("Monitor.java", "UTF-8");
+            String fileName = args[0];
+            fileName = fileName.replace(".notjava", ".java");
+            writer = new PrintWriter(fileName, "UTF-8");
             reader = new BufferedReader(new FileReader(file));
             String text = null;
             boolean inMonitor = false;
             int bracketCounter = 0;
+
+            //add in imports
+            writer.println("import java.util.concurrent.locks.*;");
 
             while ((text = reader.readLine()) != null) {
                 //need to cycle through until monitor class
@@ -59,7 +64,7 @@ public class JavaProcessor {
                                 String cond = text.replace("waituntil", "");
                                 cond = cond.replace(";", "");
                                 writer.println("while (!" + cond + ") {");
-                                writer.println("isEmpty.await()");
+                                writer.println("isEmpty.await();");
                                 writer.println("}");
                             } else {
                                 writer.println(text);
