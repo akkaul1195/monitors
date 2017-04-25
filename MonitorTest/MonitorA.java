@@ -12,7 +12,7 @@ public class MonitorA {
 		mutex.lock();
 		try {
 			full = 0;
-			isEmpty.signalAll();
+			isEmpty.signal();
 		} finally {
 			mutex.unlock();
 		}
@@ -23,6 +23,9 @@ public class MonitorA {
 		try {
 			while (!(full == 0)) {
 				isEmpty.await();
+				if (!(full == 0)) {
+					isEmpty.signal();
+				}
 			}
 			full = 1;
 		} finally {

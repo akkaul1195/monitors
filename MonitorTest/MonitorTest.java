@@ -1,3 +1,5 @@
+import java.time.Duration;
+import java.time.Instant;
 
 public class MonitorTest implements Runnable {
 	final static int SIZE = 200;
@@ -14,8 +16,16 @@ public class MonitorTest implements Runnable {
 		for (int i = 0; i < SIZE; ++i) {
 			t[i].start();
 		}
+
+		Instant start = Instant.now();
 		while(true){
-			System.out.println("The Number " + inc);
+			if (inc == 80000000){
+				Instant end = Instant.now();
+				Duration timeElapsed = Duration.between(start, end);
+				System.out.println("Time taken: "+ timeElapsed.getSeconds() +" Seconds");
+				break;
+			}
+			System.out.println(inc);
 		}
 	}
 	
