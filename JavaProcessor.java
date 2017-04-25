@@ -75,6 +75,7 @@ public class JavaProcessor {
                         writer.println("mutex.lock();");
                         writer.println("try {");
                         int bCount = 1;
+                        boolean ret = false;
                         while((text = reader.readLine()) != null) {
                             if (text.contains("{")) {
                                 bCount += 1;
@@ -83,6 +84,9 @@ public class JavaProcessor {
                                 bCount -= 1;
                             }
                             if (bCount == 0) {
+                                if (ret == false) {
+                                    writer.println("isEmpty.signalAll();");
+                                }
                                 writer.println("} finally {");
                                 writer.println("mutex.unlock();");
                                 writer.println("}");
@@ -91,6 +95,7 @@ public class JavaProcessor {
                             } else if (text.contains("return ")) {
                                 writer.println("isEmpty.signalAll();");
                                 writer.println(text);
+                                ret = true;
                             } else {
                                 writer.println(text);
                             }
