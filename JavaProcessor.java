@@ -14,6 +14,7 @@ public class JavaProcessor {
             String text = null;
             boolean inMonitor = false;
             int bracketCounter = 0;
+            String tabBuf = "";
 
             //add in imports
             writer.println("import java.util.concurrent.locks.*;");
@@ -23,17 +24,20 @@ public class JavaProcessor {
                 if (text.contains("monitor class")) {
                     text = text.replace("monitor ", "");
                     inMonitor = true;
+                    tabBuf += "\t";
                     writer.println(text);
-                    writer.println("private final Lock mutex = new ReentrantLock();");
-                    writer.println("private final Condition isEmpty = mutex.newCondition();");
+                    writer.println(tabBuf + "private final Lock mutex = new ReentrantLock();");
+                    writer.println(tabBuf + "private final Condition isEmpty = mutex.newCondition();");
                     bracketCounter += 1;
                     text = reader.readLine();
                 }
                 if (inMonitor == true && text.contains("{")) {
                     bracketCounter += 1;
+                    tabBuf += "\t";
                 }
                 if (inMonitor == true && text.contains("}")) {
                     bracketCounter -= 1;
+                    tabBuf = tabBuf.substring(0, tabBuf.length()-1);
                     if (inMonitor && bracketCounter == 0) {
                         inMonitor = false;
                     }
@@ -43,61 +47,77 @@ public class JavaProcessor {
 
                 if (inMonitor) {
                     if (text.contains(" await(")) {
-                        writer.println(text.replace("{", "") + "throws InterruptedException {");
-                        writer.println("mutex.lock();");
-                        writer.println("try {");
+                        tabBuf = tabBuf.substring(0, tabBuf.length()-1);
+                        writer.println(text.replace("{", "") + " throws InterruptedException {");
+                        writer.println(tabBuf + "mutex.lock();");
+                        writer.println(tabBuf + "try {");
+                        tabBuf += "\t";
                         int bCount = 1;
                         while((text = reader.readLine()) != null) {
                             if (text.contains("{")) {
+                                tabBuf+="\t";
                                 bCount += 1;
                             }
                             if (text.contains("}")) {
                                 bCount -= 1;
+                                tabBuf = tabBuf.substring(0, tabBuf.length()-1);
                             }
                             if (bCount == 0) {
-                                writer.println("} finally {");
-                                writer.println("mutex.unlock();");
-                                writer.println("}");
-                                writer.println(text);
+                                writer.println(tabBuf + "} finally {");
+                                tabBuf += "\t";
+                                writer.println(tabBuf + "mutex.unlock();");
+                                tabBuf = tabBuf.substring(0, tabBuf.length()-1);
+                                writer.println(tabBuf + "}");
+                                tabBuf = tabBuf.substring(0, tabBuf.length()-1);
+                                writer.println(tabBuf + text.replace("\t", ""));
                                 break;
                             } else if (text.contains("waituntil(")) {
-                                String cond = text.replace("waituntil", "");
+                                String cond = text.replace("waituntil", "").replace("\t", "");
                                 cond = cond.replace(";", "");
-                                writer.println("while (!" + cond + ") {");
-                                writer.println("isEmpty.await();");
-                                writer.println("}");
+                                writer.println(tabBuf + "while (!" + cond + ") {");
+                                tabBuf += "\t";
+                                writer.println(tabBuf + "isEmpty.await();");
+                                tabBuf = tabBuf.substring(0, tabBuf.length()-1);
+                                writer.println(tabBuf + "}");
                             } else {
-                                writer.println(text);
+                                writer.println(tabBuf + text.replace("\t",""));
                             }
                         }
                     } else if (text.contains(" unlock(")) {
-                        writer.println(text.replace("{", "") + "throws InterruptedException {");
-                        writer.println("mutex.lock();");
-                        writer.println("try {");
+                        writer.println(text.replace("{", "") + " throws InterruptedException {");
+                        writer.println(tabBuf + "mutex.lock();");
+                        writer.println(tabBuf + "try {");
+                        tabBuf += "\t";
                         int bCount = 1;
                         boolean ret = false;
                         while((text = reader.readLine()) != null) {
                             if (text.contains("{")) {
                                 bCount += 1;
+                                tabBuf += "\t";
                             }
                             if (text.contains("}")) {
                                 bCount -= 1;
+                                tabBuf = tabBuf.substring(0, tabBuf.length()-1);
                             }
                             if (bCount == 0) {
+                                tabBuf += "\t";
                                 if (ret == false) {
-                                    writer.println("isEmpty.signalAll();");
+                                    writer.println(tabBuf + "isEmpty.signalAll();");
                                 }
-                                writer.println("} finally {");
-                                writer.println("mutex.unlock();");
-                                writer.println("}");
+                                tabBuf = tabBuf.substring(0, tabBuf.length()-1);
+                                writer.println(tabBuf + "} finally {");
+                                tabBuf += "\t";
+                                writer.println(tabBuf + "mutex.unlock();");
+                                tabBuf = tabBuf.substring(0, tabBuf.length()-1);
+                                writer.println(tabBuf + "}");
                                 writer.println(text);
                                 break;
                             } else if (text.contains("return ")) {
-                                writer.println("isEmpty.signalAll();");
-                                writer.println(text);
+                                writer.println(tabBuf + "isEmpty.signalAll();");
+                                writer.println(tabBuf + text);
                                 ret = true;
                             } else {
-                                writer.println(text);
+                                writer.println(tabBuf + text.replace("\t", ""));
                             }
                         }
                     } else {
